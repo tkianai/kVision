@@ -1,5 +1,5 @@
 
-import .config as VidConf
+from . import config as VidConf
 
 def get_video_fourcc(vid_suffix):
     """Get corresponding fourcc for opencv-python video ops

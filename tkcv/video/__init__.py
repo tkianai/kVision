@@ -1,2 +1,2 @@
 
-from utils import get_video_fourcc
+from .utils import get_video_fourcc
