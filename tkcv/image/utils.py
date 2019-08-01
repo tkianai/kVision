@@ -1,5 +1,5 @@
 
-from . import config as ImgConf
+from .config import ImageConf as ImgConf
 import os
 
 def image_format_check(img_path):

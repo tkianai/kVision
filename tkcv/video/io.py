@@ -2,14 +2,25 @@
 """This provides video io operations
 
 > write_imgs2vid
+> extract_vid2imgs
 """
 
 import os
 import cv2
+import time
+import shutil
 from tkcv.image import image_format_check
 from tkcv.video import get_video_fourcc
+from tkcv.video import get_video_frame_multiplier
 
-def write_imgs2vid(img_dir, fps=25, suffix='mp4', save_dir=None, start_idx=None, end_idx=None):
+def write_imgs2vid(
+    img_dir, 
+    fps=25, 
+    suffix='mp4', 
+    save_dir=None, 
+    start_idx=None, 
+    end_idx=None
+):
     """Write images to video
     
     Arguments:
@@ -40,8 +51,8 @@ def write_imgs2vid(img_dir, fps=25, suffix='mp4', save_dir=None, start_idx=None,
             os.makedirs(save_dir)
         except :
             pass
-    save_name = os.path.join(_dir, os.path.basename(img_dir) + '.' + suffix)
-    vWriter = cv2.VideoWriter(save_name, fourcc, fps, size)
+    save_name = os.path.join(save_dir, os.path.basename(img_dir) + '.' + suffix)
+    vWriter = cv2.VideoWriter(save_name, fourcc, int(fps), size)
 
     if not start_idx:
         start_idx = 0
@@ -55,4 +66,164 @@ def write_imgs2vid(img_dir, fps=25, suffix='mp4', save_dir=None, start_idx=None,
         img = cv2.imread(images[i])
         vWriter.write(img)
 
+    vWriter.release()
+
+
+def extract_vid2imgs(
+    vid_path, 
+    start_idx=None, 
+    end_idx=None, 
+    mode=None, 
+    save_dir=None, 
+    suffix='png'
+):
+    """extract video into images
+    
+    Arguments:
+        vid_path {path} -- video path
+    
+    Keyword Arguments:
+        start_idx {int} -- start index (default: {None})
+        end_idx {int} -- end index (default: {None})
+        mode {str} -- time scale ['second', 'minute', 'hour', None] (default: {None})
+        save_dir {path} -- save directory (default: {None})
+        suffix {str} -- image format (default: {'png'})
+    """
+
+    if not save_dir:
+        base_dir = os.path.dirname(vid_path)
+        save_dir = os.path.join(base_dir, os.path.basename(vid_path).split('.')[0] + "_extracted_images")
+
+    if not os.path.exists(save_dir):
+        try:
+            os.makedirs(save_dir)
+        except :
+            pass
+
+    multiplier = get_video_frame_multiplier(mode)
+    vCapturer = cv2.VideoCapture(vid_path)
+    total_frames = vCapturer.get(cv2.CAP_PROP_FRAME_COUNT)
+    fps = vCapturer.get(cv2.CAP_PROP_FPS)
+    height = vCapturer.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    width = vCapturer.get(cv2.CAP_PROP_FRAME_WIDTH)
+
+    # sanity check
+    if start_idx is None:
+        start_idx = 0
+    if end_idx is None:
+        end_idx = total_frames
+
+    # update start index and end index
+    if multiplier:
+        start_idx *= multiplier * fps
+        end_idx *= multiplier * fps
+    
+    start_idx = int(start_idx)
+    end_idx = int(end_idx)
+    start_idx = max(0, start_idx)
+    end_idx = min(end_idx, total_frames)
+
+    for i in range(start_idx):
+        ret, frame = vCapturer.read()
+
+    for i in range(start_idx, end_idx):
+        ret, frame = vCapturer.read()
+        save_name = os.path.join(save_dir, "{:0>10}.{}".format(i, suffix))
+        cv2.imwrite(save_name, frame)
+
+    vCapturer.release()
+
+
+def extract_part_video(
+    vid_path,
+    save_path=None,
+    fps=None,
+    suffix='mp4',
+    start_idx=None,
+    end_idx=None,
+    mode=None,
+    reverse=False,
+):
+    """extract part of video
+    
+    Arguments:
+        vid_path {path} -- video path
+    
+    Keyword Arguments:
+        save_path {path} -- the video to be saved path (default: {None})
+        fps {int} -- frame per second (default: {None})
+        suffix {str} -- video suffix (default: {'mp4'})
+        start_idx {int} -- start index (default: {None})
+        end_idx {int} -- end index (default: {None})
+        mode {str} -- time scale [second, minute, hour, other] (default: {None})
+        reverse {bool} -- Need to be reverted (default: {False})
+    """
+
+    if not save_path:
+        save_dir = os.path.dirname(vid_path)
+        save_path = os.path.join(save_dir, '.'.join(os.path.basename(vid_path).split('.')[:-1]) + '_part.' + suffix)
+    else:
+        save_dir = os.path.dirname(save_path)
+
+    if not os.path.exists(save_dir):
+        try:
+            os.makedirs(save_dir)
+        except:
+            pass
+
+    multiplier = get_video_frame_multiplier(mode)
+    vCapturer = cv2.VideoCapture(vid_path)
+    total_frames = vCapturer.get(cv2.CAP_PROP_FRAME_COUNT)
+    orgin_fps = vCapturer.get(cv2.CAP_PROP_FPS)
+    height = vCapturer.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    width = vCapturer.get(cv2.CAP_PROP_FRAME_WIDTH)
+
+    # sanity check
+    if start_idx is None:
+        start_idx = 0
+    if end_idx is None:
+        end_idx = total_frames
+
+    # update start index and end index
+    if multiplier:
+        start_idx *= (multiplier * orgin_fps)
+        end_idx *= (multiplier * orgin_fps)
+
+    start_idx = int(start_idx)
+    end_idx = int(end_idx)
+    start_idx = max(0, start_idx)
+    end_idx = min(end_idx, total_frames)
+
+    size = (int(width), int(height))
+    if fps is None:
+        fps = orgin_fps
+
+    fourcc = cv2.VideoWriter_fourcc(*get_video_fourcc(suffix))
+    vWriter = cv2.VideoWriter(save_path, fourcc, int(fps), size)
+
+    for i in range(start_idx):
+        ret, frame = vCapturer.read()
+
+    if reverse:
+        temp_dir = os.path.join(save_dir, str(time.time()))
+        if not os.path.exists(temp_dir):
+            os.makedirs(temp_dir)
+
+        for i in range(start_idx, end_idx):
+            ret, frame = vCapturer.read()
+            cv2.imwrite(os.path.join(temp_dir, "{:0>10}.png".format(i)), frame)
+
+        images = os.listdir(temp_dir)
+        images = sorted(images, reverse=True)
+        for image in images:
+            img = cv2.imread(os.path.join(temp_dir, image))
+            vWriter.write(img)
+
+        shutil.rmtree(temp_dir)
+    else:
+        for i in range(start_idx, end_idx):
+            ret, frame = vCapturer.read()
+            vWriter.write(frame)
+
+    vCapturer.release()
     vWriter.release()
