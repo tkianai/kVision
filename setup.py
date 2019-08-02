@@ -2,9 +2,9 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="tkcv",
+    name="kt",
     version="0.1",
-    packages=find_packages(exclude=("tests", "images")),
+    packages=find_packages(exclude=("tests", "examples")),
     author="tkianai",
     author_email="tkianai@163.com",
     maintainer="tkianai",
