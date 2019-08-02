@@ -9,9 +9,9 @@ import os
 import cv2
 import time
 import shutil
-from tkcv.image import image_format_check
-from tkcv.video import get_video_fourcc
-from tkcv.video import get_video_frame_multiplier
+from kt.image import image_format_check
+from kt.video import get_video_fourcc
+from kt.video import get_video_frame_multiplier
 
 def write_imgs2vid(
     img_dir, 
