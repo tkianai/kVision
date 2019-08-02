@@ -5,6 +5,7 @@ import os
 import cv2
 from PIL import Image
 import numpy as np
+import hashlib
 from .config import ImageConf as ImgConf
 
 def is_blurry_by_gradient(img, threshold=None):
@@ -54,3 +55,30 @@ def get_image_hashcode(img, mode='a', hash_size=8, **kwargs):
         hashcode = str(hashcode)
 
     return hashcode
+
+
+def get_md5_code(file_path):
+    """Return image file md5 code
+    
+    Arguments:
+        file_path {path} -- Image path
+    
+    Returns:
+        str -- string format of md5
+    """
+
+    strMd5 = ""
+    try:
+        md5 = hashlib.md5()
+        with open(file_path, "rb") as r_obj:
+            while True:
+                content = r_obj.read(8096)
+                if not content:
+                    break
+                md5.update(content)
+            strMd5 = md5.hexdigest()
+    except :
+        pass
+
+    return strMd5
+                
