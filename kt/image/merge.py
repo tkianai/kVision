@@ -2,7 +2,7 @@
 """
 
 import cv2
-
+from kt.image import imread
 
 def make_overlay(background, images=None, masks=None, threshold=128, reverse=False):
     """This creates overlayed images
@@ -23,11 +23,11 @@ def make_overlay(background, images=None, masks=None, threshold=128, reverse=Fal
     if masks is not None:
         assert len(images) == len(masks), "the length of images must be equal to masks"
 
-    base = cv2.imread(background)
+    base = imread(background)
     for i, image in enumerate(images):
-        img = cv2.imread(image)
+        img = imread(image)
         if masks is not None:
-            mask = cv2.imread(masks[i])
+            mask = imread(masks[i])
             if len(mask.shape) == 3:
                 mask = mask[:, :, 0]
         else:
