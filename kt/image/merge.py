@@ -1,0 +1,43 @@
+"""This module handle ops between several images
+"""
+
+import cv2
+
+
+def make_overlay(background, images=None, masks=None, threshold=128, reverse=False):
+    """This creates overlayed images
+    
+    Arguments:
+        background {path} -- the image to be overlayed
+    
+    Keyword Arguments:
+        images {list} -- list of image paths (default: {None})
+        masks {list} -- list of corresponding mask (default: {None})
+        threshold {int} -- threshold to compute bool mask (default: {128})
+        reverse {bool} -- whether reverse the selected region or not (default: {False})
+    
+    Returns:
+        numpy array -- H X W X C
+    """
+
+    if masks is not None:
+        assert len(images) == len(masks), "the length of images must be equal to masks"
+
+    base = cv2.imread(background)
+    for i, image in enumerate(images):
+        img = cv2.imread(image)
+        if masks is not None:
+            mask = cv2.imread(masks[i])
+            if len(mask.shape) == 3:
+                mask = mask[:, :, 0]
+        else:
+            mask = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        if reverse:
+            mask = mask < threshold
+        else:
+            mask = mask > threshold
+
+        base[mask, :] = img[mask, :]
+
+    return base
