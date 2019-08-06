@@ -14,16 +14,16 @@ class Parallel(object):
         self.cores = int(cores)
         self.res = []
         
-    def run(self, job, data):
+    def run(self, job, arguments):
         """Run multiprocess jobss
         
         Arguments:
             job {function} -- the job
-            data {list} -- list of tuple
+            arguments {list} -- list of tuple
         """
 
         pool = mp.Pool(processes=self.cores)
-        for itm in data:
+        for itm in arguments:
             self.res.append(pool.apply_async(job, itm))
 
         pool.close()
