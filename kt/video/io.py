@@ -14,44 +14,65 @@ from kt.video import get_video_fourcc
 from kt.video import get_video_frame_multiplier
 
 def write_imgs2vid(
-    img_dir, 
+    save_path,
+    img_dir=None,
+    images=None,
     fps=25, 
-    suffix='mp4', 
-    save_dir=None, 
+    suffix='mp4',  
     start_idx=None, 
-    end_idx=None
+    end_idx=None,
+    walk_mode=False,
 ):
     """Write images to video
     
     Arguments:
-        img_dir {path} -- image directory
+        save_path {path} -- video path to be saved
     
     Keyword Arguments:
+        img_dir {path} -- image directory (default: {None})
+        images {list} -- list of image paths (default: {None})
         fps {int} -- video frames per second (default: {25})
         suffix {str} -- video type (default: {'mp4'})
-        save_dir {path} -- the directory which video to be saved (default: {None})
         start_idx {int} -- images start index (default: {None})
         end_idx {int} -- images end index (default: {None})
+        walk_mode {bool} -- using os.walk or os.listdir (default: {False})
     """
 
-    images = sorted(os.listdir(img_dir))
-    images = [os.path.join(img_dir, e) for e in images if image_format_check(e)]
+    if images is None:
+        if walk_mode:
+            images = []
+            for root, _, files in os.walk(img_dir):
+                for file in files:
+                    if image_format_check(file):
+                        images.append(os.path.join(root, file))
+        else:
+            images = sorted(os.listdir(img_dir))
+            images = [os.path.join(img_dir, e) for e in images if image_format_check(e)]
+    
     sample = cv2.imread(images[0])
     if len(sample.shape) == 3:
         height, width, _ = sample.shape
     else:
         height, width = sample.shape
 
-    size = (width, height)
-    fourcc = cv2.VideoWriter_fourcc(*get_video_fourcc(suffix))
-    if not save_dir:
-        save_dir = os.path.dirname(img_dir)
+    save_dir = os.path.dirname(save_path)
+    basename = os.path.basename(save_path)
     if not os.path.exists(save_dir):
         try:
             os.makedirs(save_dir)
-        except :
+        except:
             pass
-    save_name = os.path.join(save_dir, os.path.basename(img_dir) + '.' + suffix)
+    
+    if len(basename.split('.')) > 1:
+        _suffix = basename.split('.')[-1]
+        if get_video_fourcc(_suffix) is not None:
+            suffix = _suffix
+            save_name = save_path
+    else:
+        save_name = os.path.join(save_dir, basename + '.' + suffix)
+
+    size = (width, height)
+    fourcc = cv2.VideoWriter_fourcc(*get_video_fourcc(suffix))
     vWriter = cv2.VideoWriter(save_name, fourcc, int(fps), size)
 
     if not start_idx:
