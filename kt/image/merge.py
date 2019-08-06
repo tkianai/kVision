@@ -4,7 +4,7 @@
 import cv2
 from kt.image import imread
 
-def make_overlay(background, images=None, masks=None, threshold=128, reverse=False):
+def make_overlay(background, images=None, masks=None, threshold=128, reverse=False, ratio=1.0):
     """This creates overlayed images
     
     Arguments:
@@ -15,6 +15,7 @@ def make_overlay(background, images=None, masks=None, threshold=128, reverse=Fal
         masks {list} -- list of corresponding mask (default: {None})
         threshold {int} -- threshold to compute bool mask (default: {128})
         reverse {bool} -- whether reverse the selected region or not (default: {False})
+        ratio {float} -- merge ratio (default: {1.0})
     
     Returns:
         numpy array -- H X W X C
@@ -38,6 +39,5 @@ def make_overlay(background, images=None, masks=None, threshold=128, reverse=Fal
         else:
             mask = mask > threshold
 
-        base[mask, :] = img[mask, :]
-
-    return base
+        base[mask, :] = base[mask, :] * (1 - ratio) + img[mask, :] * ratio
+    return base.astype(np.uint8)
