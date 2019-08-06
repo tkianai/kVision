@@ -2,6 +2,7 @@
 """
 
 import cv2
+import numpy as np
 from kt.image import imread
 
 def make_overlay(background, images=None, masks=None, threshold=128, reverse=False, ratio=1.0):
