@@ -92,11 +92,11 @@ def write_imgs2vid(
 
 def extract_vid2imgs(
     vid_path, 
-    start_idx=None, 
-    end_idx=None, 
-    mode=None, 
     save_dir=None, 
-    suffix='png'
+    suffix='png',
+    start_idx=None,
+    end_idx=None,
+    mode=None,
 ):
     """extract video into images
     
@@ -104,11 +104,11 @@ def extract_vid2imgs(
         vid_path {path} -- video path
     
     Keyword Arguments:
+        save_dir {path} -- save directory (default: {None})
+        suffix {str} -- image format (default: {'png'})
         start_idx {int} -- start index (default: {None})
         end_idx {int} -- end index (default: {None})
         mode {str} -- time scale ['second', 'minute', 'hour', None] (default: {None})
-        save_dir {path} -- save directory (default: {None})
-        suffix {str} -- image format (default: {'png'})
     """
 
     if not save_dir:
