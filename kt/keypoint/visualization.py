@@ -37,17 +37,20 @@ def show_keypoints_over_image(
 
     # plot isolate keypoints
     for point in points:
-        # point: [width(x), height(y)]
-        img = cv2.circle(img, (int(point[0], int(point[1]))), radius, color, -1)
+        # point: [width(x), height(y), visible]
+        if point[2] > 0:
+            img = cv2.circle(img, (int(point[0], int(point[1]))), radius, color, -1)
     
     
     # plot skeletons
     if skeletons is not None:
         for skeleton in skeletons:
-            line_color = np.random.randint(256, size=3).tolist()
-            p1 = points[skeleton[0]]
-            p2 = points[skeleton[1]]
-            img = cv2.line(img, p1, p2, line_color, 2)
+            p1_v, p2_v = points[skeleton[0]][2], points[skeleton[1]][2]
+            if p1_v > 0 and p2_v > 0:
+                line_color = np.random.randint(256, size=3).tolist()
+                p1 = (int(points[skeleton[0]][0]), int(points[skeleton[0]][1]))
+                p2 = (int(points[skeleton[1]][0]), int(points[skeleton[1]][1]))
+                img = cv2.line(img, p1, p2, line_color, 2)
 
 
     return img
