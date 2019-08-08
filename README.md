@@ -8,3 +8,5 @@ The most commonly used tools for computer vision, including transforms, annotati
 - [x] polygon_mask transfer
 - [x] image video transfer
 - [x] video utils
+- [x] Parallel process
+- [x] image utils
