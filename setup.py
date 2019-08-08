@@ -16,5 +16,6 @@ setup(
     install_requires=[
         'opencv-python>=4.1.0.25',
         'scikit-image', 
+        "imagehash"
     ],
 )
