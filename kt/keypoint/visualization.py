@@ -39,7 +39,7 @@ def show_keypoints_over_image(
     for point in points:
         # point: [width(x), height(y), visible]
         if point[2] > 0:
-            img = cv2.circle(img, (int(point[0], int(point[1]))), radius, color, -1)
+            img = cv2.circle(img, (int(point[0]), int(point[1])), radius, color,-1)
     
     
     # plot skeletons
